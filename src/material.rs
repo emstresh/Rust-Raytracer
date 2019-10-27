@@ -1,5 +1,6 @@
 use crate::ray::Ray;
 use crate::hitable::HitRecord;
+use crate::texture::{ Texture, Textured };
 use crate::util;
 
 use cgmath::{
@@ -9,11 +10,11 @@ use cgmath::{
 };
 
 pub struct Lambertian {
-    pub albedo: Vector3<f32>
+    pub albedo: Texture
 }
 
 pub struct Metal {
-    pub albedo: Vector3<f32>,
+    pub albedo: Texture,
     pub fuzz: f32
 }
 
@@ -33,11 +34,11 @@ pub enum Material {
 }
 
 impl Material {
-    pub fn lambertian(albedo: Vector3<f32>) -> Material {
+    pub fn lambertian(albedo: Texture) -> Material {
         Material::Lambertian(Lambertian { albedo })
     }
 
-    pub fn metal(albedo: Vector3<f32>, f: f32) -> Material {
+    pub fn metal(albedo: Texture, f: f32) -> Material {
         Material::Metal(Metal { albedo, fuzz: f.min(1.0) })
     }
 
@@ -58,8 +59,8 @@ impl Lambertian {
     fn scatter(&self, r_in: Ray, hit: &HitRecord) -> Option<Scatter> {
         let target = hit.p + hit.normal + util::random_in_unit_sphere();
         Some(Scatter {
-            attenuation: self.albedo,
-            ray: Ray::new(hit.p, target - hit.p)
+            attenuation: self.albedo.value(0.0, 0.0, &hit.p),
+            ray: Ray::new(hit.p, target - hit.p, r_in.time)
         })
     }
 }
@@ -69,10 +70,11 @@ impl Metal {
         let reflected = reflect(r_in.direction.normalize(), hit.normal);
         if dot(reflected, hit.normal) > 0.0 {
             Some(Scatter {
-                attenuation: self.albedo,
+                attenuation: self.albedo.value(0.0, 0.0, &hit.p),
                 ray: Ray::new(
                     hit.p,
-                    reflected + self.fuzz * util::random_in_unit_sphere()
+                    reflected + self.fuzz * util::random_in_unit_sphere(),
+                    r_in.time
                 )
             })
         } else {
@@ -114,7 +116,8 @@ impl Dielectric {
                 attenuation,
                 ray: Ray::new(
                     hit.p,
-                    out_dir
+                    out_dir,
+                    r_in.time
                 )
             })
         } else {
@@ -122,7 +125,8 @@ impl Dielectric {
                 attenuation,
                 ray: Ray::new(
                     hit.p,
-                    reflected
+                    reflected,
+                    r_in.time
                 )
             })
         }

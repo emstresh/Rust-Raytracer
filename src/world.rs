@@ -1,19 +1,24 @@
-use cgmath::{ Point3, Vector3, InnerSpace };
+use cgmath::{ Vector3, InnerSpace };
 use rand::prelude::*;
 
-use std::time::{ Instant };
+use std::time::Instant;
 
-use crate::hitable::{ Hitable, HitableList };
+use crate::hitable::Geometry;
 use crate::material::Material;
+use crate::texture::{ Texture };
 
-pub fn random_scene() -> HitableList {
+
+pub fn many_spheres() -> Vec<Geometry> {
     let now = Instant::now();
-    let mut world = HitableList::new(500);
-    world.items.push(Hitable::sphere(
-        Point3::new(0.0, -1000.0, 0.0),
+    let mut world = Vec::with_capacity(500);
+    world.push(Geometry::sphere(
+        Vector3::new(0.0, -1000.0, 0.0),
         1000.0,
         Material::lambertian(
-            Vector3::new(0.5, 0.5, 0.5)
+            Texture::checker(
+                Texture::constant(0.2, 0.3, 0.1),
+                Texture::constant(0.9, 0.9, 0.9)
+            )
         )
     ));
 
@@ -27,25 +32,28 @@ pub fn random_scene() -> HitableList {
                 b as f32 + 0.9 * random::<f32>()
             );
 
-            if (center - temp).magnitude() > 0.9 {
+            if (center - temp).magnitude() > 0.9 { // diffuse
                 if choose_mat < 0.8 {
-                    world.items.push(Hitable::sphere(
-                        Point3::new(center.x, center.y, center.z),
+                    world.push(Geometry::moving_sphere(
+                        Vector3::new(center.x, center.y, center.z),
+                        center + Vector3::new(0.0, 0.5 * random::<f32>(), 0.0),
+                        0.0,
+                        1.0,
                         0.2,
                         Material::lambertian(
-                            Vector3::new(
+                            Texture::constant(
                                 random::<f32>()*random::<f32>(),
                                 random::<f32>()*random::<f32>(),
                                 random::<f32>()*random::<f32>()
                             )
                         )
                     ))
-                } else if choose_mat < 0.95 {
-                    world.items.push(Hitable::sphere(
-                        Point3::new(center.x, center.y, center.z),
+                } else if choose_mat < 0.95 { // metallic
+                    world.push(Geometry::sphere(
+                        Vector3::new(center.x, center.y, center.z),
                         0.2,
                         Material::metal(
-                            Vector3::new(
+                            Texture::constant(
                                 0.5 * (1.0 + random::<f32>()),
                                 0.5 * (1.0 + random::<f32>()),
                                 0.5 * (1.0 + random::<f32>())
@@ -53,9 +61,9 @@ pub fn random_scene() -> HitableList {
                             0.5 * random::<f32>()
                         )
                     ))
-                } else {
-                    world.items.push(Hitable::sphere(
-                        Point3::new(center.x, center.y, center.z),
+                } else { // dielectric
+                    world.push(Geometry::sphere(
+                        Vector3::new(center.x, center.y, center.z),
                         0.2,
                         Material::dielectric(1.5)
                     ))
@@ -64,25 +72,74 @@ pub fn random_scene() -> HitableList {
         }
     }
 
-    world.items.push(Hitable::sphere(
-        Point3::new(0.0, 1.0, 0.0),
+    world.push(Geometry::sphere(
+        Vector3::new(0.0, 1.0, 0.0),
         1.0,
         Material::dielectric(1.5)
     ));
 
-    world.items.push(Hitable::sphere(
-        Point3::new(-3.0, 1.0, 0.0),
+    world.push(Geometry::sphere(
+        Vector3::new(-3.0, 1.0, 0.0),
         1.0,
-        Material::lambertian(Vector3::new(0.4, 0.2, 0.1))
+        Material::lambertian(Texture::constant(0.4, 0.2, 0.1))
     ));
 
-    world.items.push(Hitable::sphere(
-        Point3::new(3.0, 1.0, 0.0),
+    world.push(Geometry::sphere(
+        Vector3::new(3.0, 1.0, 0.0),
         1.0,
-        Material::metal(Vector3::new(0.7, 0.6, 0.5), 0.0)
+        Material::metal(Texture::constant(0.7, 0.6, 0.5), 0.0)
     ));
 
     println!("{} seconds to generate scene", now.elapsed().as_secs());
+
+    world
+}
+
+pub fn two_checker_spheres() -> Vec<Geometry> {
+    let mut world = Vec::with_capacity(2);
+    world.push(Geometry::sphere(
+        Vector3::new(0.0, -10.0, 0.0),
+        10.0,
+        Material::lambertian(
+            Texture::checker(
+                Texture::constant(0.2, 0.3, 0.1),
+                Texture::constant(0.9, 0.9, 0.9)
+            )
+        )
+    ));
+
+    world.push(Geometry::sphere(
+        Vector3::new(0.0, 10.0, 0.0),
+        10.0,
+        Material::lambertian(
+            Texture::checker(
+                Texture::constant(0.2, 0.3, 0.1),
+                Texture::constant(0.9, 0.9, 0.9)
+            )
+        )
+    ));
+
+    world
+}
+
+pub fn noisy_spheres() -> Vec<Geometry> {
+    let mut world = Vec::with_capacity(2);
+
+    world.push(Geometry::sphere(
+        Vector3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        Material::lambertian(
+            Texture::noise(5.0)
+        )
+    ));
+
+    world.push(Geometry::sphere(
+        Vector3::new(0.0, 2.0, 0.0),
+        2.0,
+        Material::lambertian(
+            Texture::noise(5.0)
+        )
+    ));
 
     world
 }

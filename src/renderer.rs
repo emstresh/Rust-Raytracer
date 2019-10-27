@@ -2,17 +2,17 @@ use cgmath::{ Vector3, InnerSpace, ElementWise };
 use rand::prelude::*;
 use rayon::prelude::*;
 
-use std::time::{ Instant };
+use std::time::Instant;
 
 use crate::camera::Camera;
-use crate::hitable::{ HitableList };
+use crate::hitable::{ Geometry, hit_list };
 use crate::ray::Ray;
 
-const NUM_SAMPLES: i32 = 128;
+const NUM_SAMPLES: i32 = 16;
 const MAX_DEPTH: i32 = 16;
 
-fn color(r: Ray, world: &HitableList, depth: i32) -> Vector3<f32> {
-    if let Some(hit) = world.hit(&r, 0.001, std::f32::MAX) {
+fn color(r: Ray, world: &[Geometry], depth: i32) -> Vector3<f32> {
+    if let Some(hit) = hit_list(world, &r, 0.001, std::f32::MAX) {
         if depth < MAX_DEPTH {
             if let Some(scatter) = hit.material.scatter(r, &hit) {
                 return scatter.attenuation.mul_element_wise(color(scatter.ray, world, depth + 1));
@@ -28,7 +28,7 @@ fn color(r: Ray, world: &HitableList, depth: i32) -> Vector3<f32> {
     }
 }
 
-pub fn draw(camera: Camera, world: HitableList, width: usize, height: usize) -> Vec<u32> {
+pub fn draw(camera: Camera, world: Vec<Geometry>, width: usize, height: usize) -> Vec<u32> {
     let now = Instant::now();
     let mut buffer: Vec<u32> = vec![0; width * height];
 
@@ -44,7 +44,7 @@ pub fn draw(camera: Camera, world: HitableList, width: usize, height: usize) -> 
                 let v = 1.0 - ((j as f32 + random::<f32>()) / f_height);
 
                 let r = camera.get_ray(u, v);
-                col += color(r, &world, 0);
+                col += color(r, &world[..], 0);
             }
             col /= f_samples;
 

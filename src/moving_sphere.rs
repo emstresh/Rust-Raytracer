@@ -8,34 +8,50 @@ use cgmath::{
     Vector3
 };
 
-pub struct Sphere {
-    pub center: Vector3<f32>,
+pub struct MovingSphere {
+    pub center0: Vector3<f32>,
+    pub center1: Vector3<f32>,
+    pub time0: f32,
+    pub time1: f32,
     pub radius: f32,
     pub material: Material
 }
 
-impl Sphere {
-    pub fn new(center: Vector3<f32>, radius: f32, material: Material) -> Self {
+impl MovingSphere {
+    pub fn new(center0: Vector3<f32>, center1: Vector3<f32>, time0: f32, time1: f32, radius: f32, material: Material) -> Self {
         Self {
-            center,
+            center0,
+            center1,
+            time0,
+            time1,
             radius,
             material
         }
     }
-}
 
-impl Bounded for Sphere {
-    fn bounds(&self, _t0: f32, _t1: f32) -> BBox {
-        BBox::new(
-            self.center - Vector3::new(self.radius, self.radius, self.radius),
-            self.center + Vector3::new(self.radius, self.radius, self.radius)
-        )
+    pub fn center(&self, time: f32) -> Vector3<f32> {
+        self.center0 + ((time - self.time0) / (self.time1 - self.time0)) * (self.center1 - self.center0)
     }
 }
 
-impl Hitable for Sphere {
+impl Bounded for MovingSphere {
+    fn bounds(&self, t0: f32, t1: f32) -> BBox {
+        let boxt0 = BBox::new(
+            self.center(t0) - Vector3::new(self.radius, self.radius, self.radius),
+            self.center(t0) + Vector3::new(self.radius, self.radius, self.radius)
+        );
+        let boxt1 = BBox::new(
+            self.center(t1) - Vector3::new(self.radius, self.radius, self.radius),
+            self.center(t1) + Vector3::new(self.radius, self.radius, self.radius)
+        );
+
+        boxt0.merge(&boxt1)
+    }
+}
+
+impl Hitable for MovingSphere {
     fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
-        let oc = r.origin - self.center;
+        let oc = r.origin - self.center(r.time);
         let a = dot(r.direction, r.direction);
         let b = dot(oc, r.direction);
         let c = dot(oc, oc) - self.radius * self.radius;
@@ -48,7 +64,7 @@ impl Hitable for Sphere {
                 return Some(HitRecord {
                     t: temp,
                     p: hit_point,
-                    normal: (hit_point - self.center) / self.radius,
+                    normal: (hit_point - self.center(r.time)) / self.radius,
                     material: &self.material
                 });
             }
@@ -58,7 +74,7 @@ impl Hitable for Sphere {
                 return Some(HitRecord {
                     t: temp,
                     p: hit_point,
-                    normal: (hit_point - self.center) / self.radius,
+                    normal: (hit_point - self.center(r.time)) / self.radius,
                     material: &self.material
                 });
             }
