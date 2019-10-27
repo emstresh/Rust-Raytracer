@@ -95,6 +95,8 @@ impl NoiseTexture {
 
 impl Textured for NoiseTexture {
     fn value(&self, u: f32, v: f32, p: &Vector3<f32>) -> Vector3<f32> {
-        Vector3::new(1.0, 1.0, 1.0) * self.noise.noise(self.scale * p)
+        // Vector3::new(1.0, 1.0, 1.0) * ((1.0 + self.noise.noise(self.scale * p)) * 0.5)
+        // Vector3::new(1.0, 1.0, 1.0) * self.noise.turb(self.scale * p, 7)
+        Vector3::new(1.0, 1.0, 1.0) * 0.5 * (1.0 + (self.scale * &p.z + 10.0 * self.noise.turb(1.0 * p, 7)).sin())
     }
 }
