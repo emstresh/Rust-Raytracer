@@ -1,6 +1,7 @@
 use crate::ray::Ray;
 use crate::material::Material;
 use crate::sphere::Sphere;
+use crate::rect::Rectangle;
 use crate::moving_sphere::MovingSphere;
 use crate::bbox::{ Bounded, BBox };
 
@@ -13,6 +14,7 @@ pub trait Hitable {
 pub enum Geometry {
     Sphere(Sphere),
     MovingSphere(MovingSphere),
+    Rectangle(Rectangle)
 }
 
 impl Geometry {
@@ -23,13 +25,18 @@ impl Geometry {
     pub fn moving_sphere(center0: Vector3<f32>, center1: Vector3<f32>, time0: f32, time1: f32, radius: f32, material: Material) -> Geometry {
         Geometry::MovingSphere(MovingSphere::new(center0, center1, time0, time1, radius, material))
     }
+
+    pub fn rectangle(x0: f32, x1: f32, y0: f32, y1: f32, k: f32, material: Material) -> Geometry {
+        Geometry::Rectangle(Rectangle::new(x0, x1, y0, y1, k, material))
+    }
 }
 
 impl Bounded for Geometry {
     fn bounds(&self, t0: f32, t1: f32) -> BBox {
         match self {
             Geometry::Sphere(s) => s.bounds(t0, t1),
-            Geometry::MovingSphere(ms) => ms.bounds(t0, t1)
+            Geometry::MovingSphere(ms) => ms.bounds(t0, t1),
+            Geometry::Rectangle(r) => r.bounds(t0, t1)
         }
     }
 }
@@ -38,7 +45,8 @@ impl Hitable for Geometry {
     fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         match self {
             Geometry::Sphere(s) => s.hit(r, t_min, t_max),
-            Geometry::MovingSphere(ms) => ms.hit(r, t_min, t_max)
+            Geometry::MovingSphere(ms) => ms.hit(r, t_min, t_max),
+            Geometry::Rectangle(re) => re.hit(r, t_min, t_max)
         }
     }
 }
@@ -47,7 +55,9 @@ pub struct HitRecord<'a> {
     pub t: f32,
     pub p: Vector3<f32>,
     pub normal: Vector3<f32>,
-    pub material: &'a Material
+    pub material: &'a Material,
+    pub u: f32,
+    pub v: f32
 }
 
 // pub struct GeometryList {

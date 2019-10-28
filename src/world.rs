@@ -143,3 +143,46 @@ pub fn noisy_spheres() -> Vec<Geometry> {
 
     world
 }
+
+pub fn img_sphere() -> Vec<Geometry> {
+    let mut world = Vec::with_capacity(1);
+
+    world.push(Geometry::sphere(
+        Vector3::new(0.0, 0.0, 0.0),
+        1.5,
+        Material::lambertian(
+            Texture::image("./8k_mercury.jpg")
+        )
+    ));
+
+    world
+}
+
+pub fn simple_lights() -> Vec<Geometry> {
+    let mut world = Vec::with_capacity(3);
+
+    world.push(Geometry::sphere(
+        Vector3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        Material::lambertian(
+            Texture::noise(4.0)
+        )
+    ));
+
+    world.push(Geometry::sphere(
+        Vector3::new(0.0, 2.0, 0.0),
+        2.0,
+        Material::lambertian(
+            Texture::noise(4.0)
+        )
+    ));
+
+    world.push(Geometry::rectangle(
+        3.0, 5.0, 1.0, 3.0, -2.0,
+        Material::diffuse_light(
+            Texture::constant(4.0, 4.0, 4.0)
+        )
+    ));
+
+    world
+}

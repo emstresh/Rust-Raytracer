@@ -2,6 +2,7 @@ use crate::ray::Ray;
 use crate::material::Material;
 use crate::hitable::{ Hitable, HitRecord };
 use crate::bbox::{ Bounded, BBox };
+use crate::util;
 
 use cgmath::{
     dot,
@@ -61,21 +62,29 @@ impl Hitable for MovingSphere {
             let mut temp = (-b - discriminant.sqrt()) / a;
             if temp < t_max && temp > t_min {
                 let hit_point = r.point_at_parameter(temp);
+                let normal = (hit_point - self.center(r.time)) / self.radius;
+                let (u, v) = util::get_sphere_uv(normal);
                 return Some(HitRecord {
                     t: temp,
                     p: hit_point,
-                    normal: (hit_point - self.center(r.time)) / self.radius,
-                    material: &self.material
+                    normal,
+                    material: &self.material,
+                    u,
+                    v
                 });
             }
             temp = (-b + discriminant.sqrt()) / a;
             if temp < t_max && temp > t_min {
                 let hit_point = r.point_at_parameter(temp);
+                let normal = (hit_point - self.center(r.time)) / self.radius;
+                let (u, v) = util::get_sphere_uv(normal);
                 return Some(HitRecord {
                     t: temp,
                     p: hit_point,
-                    normal: (hit_point - self.center(r.time)) / self.radius,
-                    material: &self.material
+                    normal,
+                    material: &self.material,
+                    u,
+                    v
                 });
             }
         }

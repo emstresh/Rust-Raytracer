@@ -9,6 +9,7 @@ mod material;
 mod moving_sphere;
 mod perlin;
 mod ray;
+mod rect;
 mod renderer;
 mod sphere;
 mod texture;
@@ -29,13 +30,13 @@ fn main() {
         panic!("{}", e);
     });
 
-    let look_from = Vector3::new(13.0, 2.0, 3.0);
+    let look_from = Vector3::new(25.0, 5.0, 3.0);
     let look_at = Vector3::new(0.0, 0.0, 0.0);
     let dist_to_focus = 10.0; // (Vector3::new(look_from.x, look_from.y, look_from.z) - look_at).magnitude();
     let aperture = 0.0;
     let camera = camera::Camera::new(look_from, look_at, Vector3::new(0.0, 1.0, 0.0), 20.0, ASPECT, aperture, dist_to_focus, 0.0, 1.0);
 
-    let mut world = world::noisy_spheres();
+    let mut world = world::simple_lights();
     // let bvh = bvh::BvhNode::new(&mut world[..], 0.0, 1.0);
     let buffer = renderer::draw(camera, world, WIDTH, HEIGHT);
 
