@@ -9,10 +9,11 @@ mod material;
 mod moving_sphere;
 mod perlin;
 mod ray;
-mod rect;
+// mod rect;
 mod renderer;
 mod sphere;
 mod texture;
+mod triangle;
 mod world;
 mod util;
 

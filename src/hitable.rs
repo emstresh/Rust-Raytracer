@@ -1,7 +1,8 @@
 use crate::ray::Ray;
 use crate::material::Material;
 use crate::sphere::Sphere;
-use crate::rect::Rectangle;
+// use crate::rect::Rectangle;
+use crate::triangle::Triangle;
 use crate::moving_sphere::MovingSphere;
 use crate::bbox::{ Bounded, BBox };
 
@@ -14,7 +15,8 @@ pub trait Hitable {
 pub enum Geometry {
     Sphere(Sphere),
     MovingSphere(MovingSphere),
-    Rectangle(Rectangle)
+    // Rectangle(Rectangle),
+    Triangle(Triangle)
 }
 
 impl Geometry {
@@ -26,8 +28,12 @@ impl Geometry {
         Geometry::MovingSphere(MovingSphere::new(center0, center1, time0, time1, radius, material))
     }
 
-    pub fn rectangle(x0: f32, x1: f32, y0: f32, y1: f32, k: f32, material: Material) -> Geometry {
-        Geometry::Rectangle(Rectangle::new(x0, x1, y0, y1, k, material))
+    // pub fn rectangle(x0: f32, x1: f32, y0: f32, y1: f32, k: f32, material: Material) -> Geometry {
+    //     Geometry::Rectangle(Rectangle::new(x0, x1, y0, y1, k, material))
+    // }
+
+    pub fn triangle(v0: Vector3<f32>, v1: Vector3<f32>, v2: Vector3<f32>, material: Material) -> Geometry {
+        Geometry::Triangle(Triangle::new(v0, v1, v2, material))
     }
 }
 
@@ -36,7 +42,8 @@ impl Bounded for Geometry {
         match self {
             Geometry::Sphere(s) => s.bounds(t0, t1),
             Geometry::MovingSphere(ms) => ms.bounds(t0, t1),
-            Geometry::Rectangle(r) => r.bounds(t0, t1)
+            // Geometry::Rectangle(r) => r.bounds(t0, t1),
+            Geometry::Triangle(t) => t.bounds(t0, t1)
         }
     }
 }
@@ -46,7 +53,8 @@ impl Hitable for Geometry {
         match self {
             Geometry::Sphere(s) => s.hit(r, t_min, t_max),
             Geometry::MovingSphere(ms) => ms.hit(r, t_min, t_max),
-            Geometry::Rectangle(re) => re.hit(r, t_min, t_max)
+            // Geometry::Rectangle(re) => re.hit(r, t_min, t_max),
+            Geometry::Triangle(t) => t.hit(r, t_min, t_max)
         }
     }
 }
