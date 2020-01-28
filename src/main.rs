@@ -36,7 +36,12 @@ fn main() {
     let aperture = 0.0;
     let camera = camera::Camera::new(look_from, look_at, Vector3::new(0.0, 1.0, 0.0), 40.0, ASPECT, aperture, dist_to_focus, 0.0, 1.0);
 
-    let mut world = world::cornell_box();
+    let green_material = &material::Material::lambertian(texture::Texture::constant(0.12, 0.45, 0.15));
+    let red_material = &material::Material::lambertian(texture::Texture::constant(0.65, 0.05, 0.05));
+    let white_material = &material::Material::lambertian(texture::Texture::constant(0.73, 0.73, 0.73));
+    let emissive_material = &material::Material::diffuse_light(texture::Texture::constant(15.0, 15.0, 15.0));
+
+    let mut world = world::cornell_box(green_material, red_material, white_material, emissive_material);
     // let bvh = bvh::BvhNode::new(&mut world[..], 0.0, 1.0);
     let buffer = renderer::draw(camera, world, WIDTH, HEIGHT);
 

@@ -11,27 +11,27 @@ pub trait Hitable {
   fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord>;
 }
 
-pub enum Geometry {
+pub enum Geometry<'material> {
     Sphere(Sphere),
     MovingSphere(MovingSphere),
-    Triangle(Triangle)
+    Triangle(Triangle<'material>)
 }
 
-impl Geometry {
-    pub fn sphere(center: Vector3<f32>, radius: f32, material: Material) -> Geometry {
+impl<'material> Geometry<'material> {
+    pub fn sphere(center: Vector3<f32>, radius: f32, material: Material) -> Geometry<'material> {
         Geometry::Sphere(Sphere::new(center, radius, material))
     }
 
-    pub fn moving_sphere(center0: Vector3<f32>, center1: Vector3<f32>, time0: f32, time1: f32, radius: f32, material: Material) -> Geometry {
+    pub fn moving_sphere(center0: Vector3<f32>, center1: Vector3<f32>, time0: f32, time1: f32, radius: f32, material: Material) -> Geometry<'material> {
         Geometry::MovingSphere(MovingSphere::new(center0, center1, time0, time1, radius, material))
     }
 
-    pub fn triangle(v0: Vector3<f32>, v1: Vector3<f32>, v2: Vector3<f32>, material: Material) -> Geometry {
+    pub fn triangle(v0: Vector3<f32>, v1: Vector3<f32>, v2: Vector3<f32>, material: &'material Material) -> Geometry<'material> {
         Geometry::Triangle(Triangle::new(v0, v1, v2, material))
     }
 }
 
-impl Bounded for Geometry {
+impl Bounded for Geometry<'_> {
     fn bounds(&self, t0: f32, t1: f32) -> BBox {
         match self {
             Geometry::Sphere(s) => s.bounds(t0, t1),
@@ -41,7 +41,7 @@ impl Bounded for Geometry {
     }
 }
 
-impl Hitable for Geometry {
+impl Hitable for Geometry<'_> {
     fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         match self {
             Geometry::Sphere(s) => s.hit(r, t_min, t_max),
@@ -59,72 +59,6 @@ pub struct HitRecord<'a> {
     pub u: f32,
     pub v: f32
 }
-
-// pub struct GeometryList {
-//     pub items: Vec<Geometry>
-// }
-
-// impl GeometryList {
-//     pub fn new(capacity: usize) -> Self {
-//         Self {
-//             items: Vec::with_capacity(capacity)
-//         }
-//     }
-
-//     pub fn bounding_box(&self, t0: f32, t1: f32) -> BBox {
-//         if self.items.len() > 1 {
-//             let min = self.items.iter().fold(
-//                 Vector3::new(std::f32::MAX, std::f32::MAX, std::f32::MAX),
-//                 |acc, item| {
-//                     if let Some(bbox) = item.bounds(t0, t1) {
-//                         Vector3::new(
-//                             acc[0].min(bbox.min[0]),
-//                             acc[1].min(bbox.min[1]),
-//                             acc[2].min(bbox.min[2])
-//                         )
-//                     } else {
-//                         acc
-//                     }
-//                 }
-//             );
-
-//             let max = self.items.iter().fold(
-//                 Vector3::new(std::f32::MIN, std::f32::MIN, std::f32::MIN),
-//                 |acc, item| {
-//                     if let Some(bbox) = item.bounds(t0, t1) {
-//                         Vector3::new(
-//                             acc[0].max(bbox.max[0]),
-//                             acc[1].max(bbox.max[1]),
-//                             acc[2].max(bbox.max[2])
-//                         )
-//                     } else {
-//                         acc
-//                     }
-//                 }
-//             );
-
-//             return BBox::new(
-//                 min,
-//                 max
-//             );
-//         }
-
-//         None
-//     }
-
-//     pub fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
-//         let mut hit_anything: Option<HitRecord> = None;
-//         let mut closest_so_far = t_max;
-//         self.items.iter().for_each(|item| {
-//             if let Some(hit) = item.hit(r, t_min, closest_so_far) {
-//                 closest_so_far = hit.t;
-//                 hit_anything = Some(hit);
-//             }
-//         });
-
-//         hit_anything
-//     }
-// }
 
 pub fn bounding_box_list<'a>(items: &'a [Geometry], t0: f32, t1: f32) -> BBox {
     let min = items.iter().fold(

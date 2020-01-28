@@ -1,4 +1,4 @@
-use cgmath::{ Vector3, InnerSpace };
+use cgmath::{ Vector3/*, InnerSpace*/ };
 // use rand::prelude::*;
 
 // use std::time::Instant;
@@ -198,7 +198,11 @@ use crate::texture::{ Texture };
 //     world
 // }
 
-pub fn cornell_box() -> Vec<Geometry> {
+pub fn cornell_box<'material>(
+    green_material: &'material Material,
+    red_material: &'material Material,
+    white_material: &'material Material,
+    emissive_material: &'material Material) -> Vec<Geometry<'material>> {
     let mut world = Vec::with_capacity(12);
 
     // green left
@@ -206,17 +210,13 @@ pub fn cornell_box() -> Vec<Geometry> {
         Vector3::new(555.0, 0.0, 0.0),
         Vector3::new(555.0, 0.0, 555.0),
         Vector3::new(555.0, 555.0, 0.0),
-        Material::lambertian(
-            Texture::constant(0.12, 0.45, 0.15)
-        )
+        green_material
     ));
     world.push(Geometry::triangle(
         Vector3::new(555.0, 555.0, 555.0),
         Vector3::new(555.0, 555.0, 0.0),
         Vector3::new(555.0, 0.0, 555.0),
-        Material::lambertian(
-            Texture::constant(0.12, 0.45, 0.15)
-        )
+        green_material
     ));
 
     // red right
@@ -224,17 +224,13 @@ pub fn cornell_box() -> Vec<Geometry> {
         Vector3::new(0.0, 0.0, 0.0),
         Vector3::new(0.0, 555.0, 0.0),
         Vector3::new(0.0, 0.0, 555.0),
-        Material::lambertian(
-            Texture::constant(0.65, 0.05, 0.05)
-        )
+        red_material
     ));
     world.push(Geometry::triangle(
         Vector3::new(0.0, 555.0, 555.0),
         Vector3::new(0.0, 0.0, 555.0),
         Vector3::new(0.0, 555.0, 0.0),
-        Material::lambertian(
-            Texture::constant(0.65, 0.05, 0.05)
-        )
+        red_material
     ));
 
     // white bottom
@@ -242,17 +238,13 @@ pub fn cornell_box() -> Vec<Geometry> {
         Vector3::new(0.0, 0.0, 0.0),
         Vector3::new(0.0, 0.0, 555.0),
         Vector3::new(555.0, 0.0, 0.0),
-        Material::lambertian(
-            Texture::constant(0.73, 0.73, 0.73)
-        )
+        white_material
     ));
     world.push(Geometry::triangle(
         Vector3::new(555.0, 0.0, 555.0),
         Vector3::new(555.0, 0.0, 0.0),
         Vector3::new(0.0, 0.0, 555.0),
-        Material::lambertian(
-            Texture::constant(0.73, 0.73, 0.73)
-        )
+        white_material
     ));
 
     // white top
@@ -260,17 +252,13 @@ pub fn cornell_box() -> Vec<Geometry> {
         Vector3::new(0.0, 555.0, 0.0),
         Vector3::new(555.0, 555.0, 0.0),
         Vector3::new(0.0, 555.0, 555.0),
-        Material::lambertian(
-            Texture::constant(0.73, 0.73, 0.73)
-        )
+        white_material
     ));
     world.push(Geometry::triangle(
         Vector3::new(555.0, 555.0, 555.0),
         Vector3::new(0.0, 555.0, 555.0),
         Vector3::new(555.0, 555.0, 0.0),
-        Material::lambertian(
-            Texture::constant(0.73, 0.73, 0.73)
-        )
+        white_material
     ));
 
     // white back
@@ -278,17 +266,13 @@ pub fn cornell_box() -> Vec<Geometry> {
         Vector3::new(0.0, 0.0, 555.0),
         Vector3::new(0.0, 555.0, 555.0),
         Vector3::new(555.0, 0.0, 555.0),
-        Material::lambertian(
-            Texture::constant(0.73, 0.73, 0.73)
-        )
+        white_material
     ));
     world.push(Geometry::triangle(
         Vector3::new(555.0, 555.0, 555.0),
         Vector3::new(555.0, 0.0, 555.0),
         Vector3::new(0.0, 555.0, 555.0),
-        Material::lambertian(
-            Texture::constant(0.73, 0.73, 0.73)
-        )
+        white_material
     ));
 
     // light
@@ -296,17 +280,13 @@ pub fn cornell_box() -> Vec<Geometry> {
         Vector3::new(213.0, 554.0, 227.0),
         Vector3::new(213.0, 554.0, 332.0),
         Vector3::new(343.0, 554.0, 227.0),
-        Material::diffuse_light(
-            Texture::constant(15.0, 15.0, 15.0)
-        )
+        emissive_material
     ));
     world.push(Geometry::triangle(
         Vector3::new(343.0, 554.0, 332.0),
         Vector3::new(343.0, 554.0, 227.0),
         Vector3::new(213.0, 554.0, 332.0),
-        Material::diffuse_light(
-            Texture::constant(15.0, 15.0, 15.0)
-        )
+        emissive_material
     ));
 
     world
