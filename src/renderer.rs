@@ -1,4 +1,4 @@
-use cgmath::{ Vector3, InnerSpace, ElementWise };
+use cgmath::{ Vector3, ElementWise };
 use rand::prelude::*;
 use rayon::prelude::*;
 
@@ -9,8 +9,8 @@ use crate::hitable::{ Geometry, hit_list };
 use crate::ray::Ray;
 use crate::material::{ Scattered, Emitter };
 
-const NUM_SAMPLES: i32 = 64;
-const MAX_DEPTH: i32 = 16;
+const NUM_SAMPLES: i32 = 1024;
+const MAX_DEPTH: i32 = 512;
 
 fn color(r: Ray, world: &[Geometry], depth: i32) -> Vector3<f32> {
     if let Some(hit) = hit_list(world, &r, 0.001, std::f32::MAX) {
@@ -19,15 +19,12 @@ fn color(r: Ray, world: &[Geometry], depth: i32) -> Vector3<f32> {
             if let Some(scatter) = hit.material.scatter(r, &hit) {
                 return emitted + scatter.attenuation.mul_element_wise(color(scatter.ray, world, depth + 1));
             } else {
-                return emitted; // Vector3::new(0.0, 0.0, 0.0);
+                return emitted;
             }
         }
         return Vector3::new(0.0, 0.0, 0.0);
     } else {
         Vector3::new(0.0, 0.0, 0.0)
-        // let unit_direction = r.direction.normalize();
-        // let t = 0.5 * (unit_direction.y + 1.0);
-        // ((1.0 - t) * Vector3::new(1.0, 1.0, 1.0)) + (t * Vector3::new(0.5, 0.7, 1.0))
     }
 }
 
@@ -51,9 +48,9 @@ pub fn draw(camera: Camera, world: Vec<Geometry>, width: usize, height: usize) -
             }
             col /= f_samples;
 
-            let ir = (255.0 * col[0].sqrt()) as u32;
-            let ig = (255.0 * col[1].sqrt()) as u32;
-            let ib = (255.0 * col[2].sqrt()) as u32;
+            let ir = (255.0 * col[0].sqrt()).max(0.0).min(255.0) as u32;
+            let ig = (255.0 * col[1].sqrt()).max(0.0).min(255.0) as u32;
+            let ib = (255.0 * col[2].sqrt()).max(0.0).min(255.0) as u32;
 
             row[i] = argb(ir, ig, ib);
         }

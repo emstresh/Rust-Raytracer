@@ -1,9 +1,9 @@
 use cgmath::{ Vector3, InnerSpace };
-use rand::prelude::*;
+// use rand::prelude::*;
 
-use std::time::Instant;
+// use std::time::Instant;
 
-use crate::hitable::Geometry;
+use crate::hitable::{ Geometry };
 use crate::material::Material;
 use crate::texture::{ Texture };
 
@@ -158,40 +158,154 @@ use crate::texture::{ Texture };
 //     world
 // }
 
-pub fn simple_lights() -> Vec<Geometry> {
-    let mut world = Vec::with_capacity(4);
+// pub fn simple_lights() -> Vec<Geometry> {
+//     let mut world = Vec::with_capacity(4);
 
-    world.push(Geometry::sphere(
-        Vector3::new(0.0, -1000.0, 0.0),
-        1000.0,
-        Material::lambertian(
-            Texture::noise(4.0)
-        )
-    ));
+//     world.push(Geometry::sphere(
+//         Vector3::new(0.0, -1000.0, 0.0),
+//         1000.0,
+//         Material::lambertian(
+//             Texture::noise(4.0)
+//         )
+//     ));
 
-    world.push(Geometry::sphere(
-        Vector3::new(0.0, 2.0, 0.0),
-        2.0,
-        Material::lambertian(
-            Texture::noise(4.0)
-        )
-    ));
+//     world.push(Geometry::sphere(
+//         Vector3::new(0.0, 2.0, 0.0),
+//         2.0,
+//         Material::lambertian(
+//             Texture::noise(4.0)
+//         )
+//     ));
 
+//     world.push(Geometry::triangle(
+//         Vector3::new(3.0, 1.0, -2.0),
+//         Vector3::new(3.0, 3.0, -2.0),
+//         Vector3::new(5.0, 1.0, -2.0),
+//         Material::diffuse_light(
+//             Texture::constant(4.0, 4.0, 4.0)
+//         )
+//     ));
+
+//     world.push(Geometry::triangle(
+//         Vector3::new(5.0, 3.0, -2.0),
+//         Vector3::new(5.0, 1.0, -2.0),
+//         Vector3::new(3.0, 3.0, -2.0),
+//         Material::diffuse_light(
+//             Texture::constant(4.0, 4.0, 4.0)
+//         )
+//     ));
+
+//     world
+// }
+
+pub fn cornell_box() -> Vec<Geometry> {
+    let mut world = Vec::with_capacity(12);
+
+    // green left
     world.push(Geometry::triangle(
-        Vector3::new(3.0, 1.0, -2.0),
-        Vector3::new(3.0, 3.0, -2.0),
-        Vector3::new(5.0, 1.0, -2.0),
-        Material::diffuse_light(
-            Texture::constant(4.0, 4.0, 4.0)
+        Vector3::new(555.0, 0.0, 0.0),
+        Vector3::new(555.0, 0.0, 555.0),
+        Vector3::new(555.0, 555.0, 0.0),
+        Material::lambertian(
+            Texture::constant(0.12, 0.45, 0.15)
+        )
+    ));
+    world.push(Geometry::triangle(
+        Vector3::new(555.0, 555.0, 555.0),
+        Vector3::new(555.0, 555.0, 0.0),
+        Vector3::new(555.0, 0.0, 555.0),
+        Material::lambertian(
+            Texture::constant(0.12, 0.45, 0.15)
         )
     ));
 
+    // red right
     world.push(Geometry::triangle(
-        Vector3::new(5.0, 3.0, -2.0),
-        Vector3::new(5.0, 1.0, -2.0),
-        Vector3::new(3.0, 3.0, -2.0),
+        Vector3::new(0.0, 0.0, 0.0),
+        Vector3::new(0.0, 555.0, 0.0),
+        Vector3::new(0.0, 0.0, 555.0),
+        Material::lambertian(
+            Texture::constant(0.65, 0.05, 0.05)
+        )
+    ));
+    world.push(Geometry::triangle(
+        Vector3::new(0.0, 555.0, 555.0),
+        Vector3::new(0.0, 0.0, 555.0),
+        Vector3::new(0.0, 555.0, 0.0),
+        Material::lambertian(
+            Texture::constant(0.65, 0.05, 0.05)
+        )
+    ));
+
+    // white bottom
+    world.push(Geometry::triangle(
+        Vector3::new(0.0, 0.0, 0.0),
+        Vector3::new(0.0, 0.0, 555.0),
+        Vector3::new(555.0, 0.0, 0.0),
+        Material::lambertian(
+            Texture::constant(0.73, 0.73, 0.73)
+        )
+    ));
+    world.push(Geometry::triangle(
+        Vector3::new(555.0, 0.0, 555.0),
+        Vector3::new(555.0, 0.0, 0.0),
+        Vector3::new(0.0, 0.0, 555.0),
+        Material::lambertian(
+            Texture::constant(0.73, 0.73, 0.73)
+        )
+    ));
+
+    // white top
+    world.push(Geometry::triangle(
+        Vector3::new(0.0, 555.0, 0.0),
+        Vector3::new(555.0, 555.0, 0.0),
+        Vector3::new(0.0, 555.0, 555.0),
+        Material::lambertian(
+            Texture::constant(0.73, 0.73, 0.73)
+        )
+    ));
+    world.push(Geometry::triangle(
+        Vector3::new(555.0, 555.0, 555.0),
+        Vector3::new(0.0, 555.0, 555.0),
+        Vector3::new(555.0, 555.0, 0.0),
+        Material::lambertian(
+            Texture::constant(0.73, 0.73, 0.73)
+        )
+    ));
+
+    // white back
+    world.push(Geometry::triangle(
+        Vector3::new(0.0, 0.0, 555.0),
+        Vector3::new(0.0, 555.0, 555.0),
+        Vector3::new(555.0, 0.0, 555.0),
+        Material::lambertian(
+            Texture::constant(0.73, 0.73, 0.73)
+        )
+    ));
+    world.push(Geometry::triangle(
+        Vector3::new(555.0, 555.0, 555.0),
+        Vector3::new(555.0, 0.0, 555.0),
+        Vector3::new(0.0, 555.0, 555.0),
+        Material::lambertian(
+            Texture::constant(0.73, 0.73, 0.73)
+        )
+    ));
+
+    // light
+    world.push(Geometry::triangle(
+        Vector3::new(213.0, 554.0, 227.0),
+        Vector3::new(213.0, 554.0, 332.0),
+        Vector3::new(343.0, 554.0, 227.0),
         Material::diffuse_light(
-            Texture::constant(4.0, 4.0, 4.0)
+            Texture::constant(15.0, 15.0, 15.0)
+        )
+    ));
+    world.push(Geometry::triangle(
+        Vector3::new(343.0, 554.0, 332.0),
+        Vector3::new(343.0, 554.0, 227.0),
+        Vector3::new(213.0, 554.0, 332.0),
+        Material::diffuse_light(
+            Texture::constant(15.0, 15.0, 15.0)
         )
     ));
 
