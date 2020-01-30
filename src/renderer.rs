@@ -9,8 +9,8 @@ use crate::hitable::{ Geometry, hit_list };
 use crate::ray::Ray;
 use crate::material::{ Scattered, Emitter };
 
-const NUM_SAMPLES: i32 = 1024;
-const MAX_DEPTH: i32 = 512;
+const NUM_SAMPLES: i32 = 256;
+const MAX_DEPTH: i32 = 128;
 
 fn color(r: Ray, world: &[Geometry], depth: i32) -> Vector3<f32> {
     if let Some(hit) = hit_list(world, &r, 0.001, std::f32::MAX) {

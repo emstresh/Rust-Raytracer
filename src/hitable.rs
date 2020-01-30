@@ -1,7 +1,7 @@
 use crate::ray::Ray;
 use crate::material::Material;
 use crate::sphere::Sphere;
-use crate::triangle::Triangle;
+use crate::mesh::Mesh;
 use crate::moving_sphere::MovingSphere;
 use crate::bbox::{ Bounded, BBox };
 
@@ -14,7 +14,7 @@ pub trait Hitable {
 pub enum Geometry<'material> {
     Sphere(Sphere),
     MovingSphere(MovingSphere),
-    Triangle(Triangle<'material>)
+    Mesh(Mesh<'material>)
 }
 
 impl<'material> Geometry<'material> {
@@ -26,8 +26,8 @@ impl<'material> Geometry<'material> {
         Geometry::MovingSphere(MovingSphere::new(center0, center1, time0, time1, radius, material))
     }
 
-    pub fn triangle(v0: Vector3<f32>, v1: Vector3<f32>, v2: Vector3<f32>, material: &'material Material) -> Geometry<'material> {
-        Geometry::Triangle(Triangle::new(v0, v1, v2, material))
+    pub fn mesh(vertices: Vec<f32>, indices: Vec<usize>, material: &'material Material) -> Geometry<'material> {
+        Geometry::Mesh(Mesh::new(vertices, indices, material))
     }
 }
 
@@ -36,7 +36,7 @@ impl Bounded for Geometry<'_> {
         match self {
             Geometry::Sphere(s) => s.bounds(t0, t1),
             Geometry::MovingSphere(ms) => ms.bounds(t0, t1),
-            Geometry::Triangle(t) => t.bounds(t0, t1)
+            Geometry::Mesh(m) => m.bounds(t0, t1)
         }
     }
 }
@@ -46,7 +46,7 @@ impl Hitable for Geometry<'_> {
         match self {
             Geometry::Sphere(s) => s.hit(r, t_min, t_max),
             Geometry::MovingSphere(ms) => ms.hit(r, t_min, t_max),
-            Geometry::Triangle(t) => t.hit(r, t_min, t_max)
+            Geometry::Mesh(m) => m.hit(r, t_min, t_max)
         }
     }
 }

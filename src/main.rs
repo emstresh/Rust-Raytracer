@@ -1,18 +1,19 @@
 use minifb::{ Key, WindowOptions, Window };
 use cgmath::{ Vector3 };
+use rand::prelude::*;
 
 mod bbox;
 // mod bvh;
 mod camera;
 mod hitable;
 mod material;
+mod mesh;
 mod moving_sphere;
 mod perlin;
 mod ray;
 mod renderer;
 mod sphere;
 mod texture;
-mod triangle;
 mod world;
 mod util;
 
