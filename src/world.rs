@@ -9,8 +9,12 @@ pub fn cornell_box<'material>(
     green_material: &'material Material,
     red_material: &'material Material,
     white_material: &'material Material,
+    metal_material: &'material Material,
+    dielectric_material: &'material Material,
+    img_material: &'material Material,
+    noise_material: &'material Material,
     emissive_material: &'material Material) -> Vec<Geometry<'material>> {
-    let mut world = Vec::with_capacity(9);
+    let mut world = Vec::with_capacity(10);
 
     // green left
     world.push(Geometry::mesh(
@@ -70,6 +74,31 @@ pub fn cornell_box<'material>(
         ],
         vec![ 0, 1, 2, 3, 2, 1 ],
         white_material
+    ));
+
+    // some spheres
+    world.push(Geometry::sphere(
+        Vector3::new(128.0, 50.0, 128.0),
+        50.0,
+        img_material
+    ));
+
+    world.push(Geometry::sphere(
+        Vector3::new(384.0, 125.0, 384.0),
+        75.0,
+        dielectric_material
+    ));
+
+    world.push(Geometry::sphere(
+        Vector3::new(64.0, 384.0, 384.0),
+        40.0,
+        metal_material
+    ));
+
+    world.push(Geometry::sphere(
+        Vector3::new(128.0, 256.0, 384.0),
+        60.0,
+        noise_material
     ));
 
     // light

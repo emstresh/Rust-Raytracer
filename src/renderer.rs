@@ -9,15 +9,13 @@ use crate::hitable::{ Geometry, hit_list };
 use crate::ray::Ray;
 use crate::material::{ Scattered, Emitter };
 
-const NUM_SAMPLES: i32 = 256;
-const MAX_DEPTH: i32 = 128;
 
-fn color(r: Ray, world: &[Geometry], depth: i32) -> Vector3<f32> {
+fn color(r: Ray, world: &[Geometry], depth: i32, max_depth: i32) -> Vector3<f32> {
     if let Some(hit) = hit_list(world, &r, 0.001, std::f32::MAX) {
-        if depth < MAX_DEPTH {
+        if depth < max_depth {
             let emitted = hit.material.emitted(hit.u, hit.v, &hit.p);
             if let Some(scatter) = hit.material.scatter(r, &hit) {
-                return emitted + scatter.attenuation.mul_element_wise(color(scatter.ray, world, depth + 1));
+                return emitted + scatter.attenuation.mul_element_wise(color(scatter.ray, world, depth + 1, max_depth));
             } else {
                 return emitted;
             }
@@ -28,23 +26,23 @@ fn color(r: Ray, world: &[Geometry], depth: i32) -> Vector3<f32> {
     }
 }
 
-pub fn draw(camera: Camera, world: Vec<Geometry>, width: usize, height: usize) -> Vec<u32> {
+pub fn draw(camera: Camera, world: Vec<Geometry>, width: usize, height: usize, num_samples: i32, max_depth: i32) -> Vec<u32> {
     let now = Instant::now();
     let mut buffer: Vec<u32> = vec![0; width * height];
 
     let f_width = width as f32;
     let f_height = height as f32;
-    let f_samples = NUM_SAMPLES as f32;
+    let f_samples = num_samples as f32;
     
     buffer.par_chunks_mut(width).enumerate().for_each(|(j, row)| {
         for i in 0..width {
             let mut col = Vector3::new(0.0, 0.0, 0.0);
-            for _s in 0..NUM_SAMPLES {
+            for _s in 0..num_samples {
                 let u = (i as f32 + random::<f32>()) / f_width;
                 let v = 1.0 - ((j as f32 + random::<f32>()) / f_height);
 
                 let r = camera.get_ray(u, v);
-                col += color(r, &world[..], 0);
+                col += color(r, &world[..], 0, max_depth);
             }
             col /= f_samples;
 

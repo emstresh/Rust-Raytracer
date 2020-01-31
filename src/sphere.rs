@@ -9,14 +9,14 @@ use cgmath::{
     Vector3
 };
 
-pub struct Sphere {
+pub struct Sphere<'material> {
     pub center: Vector3<f32>,
     pub radius: f32,
-    pub material: Material
+    pub material: &'material Material
 }
 
-impl Sphere {
-    pub fn new(center: Vector3<f32>, radius: f32, material: Material) -> Self {
+impl<'material> Sphere<'material> {
+    pub fn new(center: Vector3<f32>, radius: f32, material: &'material Material) -> Self {
         Self {
             center,
             radius,
@@ -25,7 +25,7 @@ impl Sphere {
     }
 }
 
-impl Bounded for Sphere {
+impl Bounded for Sphere<'_> {
     fn bounds(&self, _t0: f32, _t1: f32) -> BBox {
         BBox::new(
             self.center - Vector3::new(self.radius, self.radius, self.radius),
@@ -34,7 +34,7 @@ impl Bounded for Sphere {
     }
 }
 
-impl Hitable for Sphere {
+impl Hitable for Sphere<'_> {
     fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         let oc = r.origin - self.center;
         let a = dot(r.direction, r.direction);

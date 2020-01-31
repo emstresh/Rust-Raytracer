@@ -9,17 +9,17 @@ use cgmath::{
     Vector3
 };
 
-pub struct MovingSphere {
+pub struct MovingSphere<'material> {
     pub center0: Vector3<f32>,
     pub center1: Vector3<f32>,
     pub time0: f32,
     pub time1: f32,
     pub radius: f32,
-    pub material: Material
+    pub material: &'material Material
 }
 
-impl MovingSphere {
-    pub fn new(center0: Vector3<f32>, center1: Vector3<f32>, time0: f32, time1: f32, radius: f32, material: Material) -> Self {
+impl<'material> MovingSphere<'material> {
+    pub fn new(center0: Vector3<f32>, center1: Vector3<f32>, time0: f32, time1: f32, radius: f32, material: &'material Material) -> Self {
         Self {
             center0,
             center1,
@@ -35,7 +35,7 @@ impl MovingSphere {
     }
 }
 
-impl Bounded for MovingSphere {
+impl Bounded for MovingSphere<'_> {
     fn bounds(&self, t0: f32, t1: f32) -> BBox {
         let boxt0 = BBox::new(
             self.center(t0) - Vector3::new(self.radius, self.radius, self.radius),
@@ -50,7 +50,7 @@ impl Bounded for MovingSphere {
     }
 }
 
-impl Hitable for MovingSphere {
+impl Hitable for MovingSphere<'_> {
     fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         let oc = r.origin - self.center(r.time);
         let a = dot(r.direction, r.direction);

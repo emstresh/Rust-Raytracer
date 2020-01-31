@@ -12,17 +12,17 @@ pub trait Hitable {
 }
 
 pub enum Geometry<'material> {
-    Sphere(Sphere),
-    MovingSphere(MovingSphere),
+    Sphere(Sphere<'material>),
+    MovingSphere(MovingSphere<'material>),
     Mesh(Mesh<'material>)
 }
 
 impl<'material> Geometry<'material> {
-    pub fn sphere(center: Vector3<f32>, radius: f32, material: Material) -> Geometry<'material> {
+    pub fn sphere(center: Vector3<f32>, radius: f32, material: &'material Material) -> Geometry<'material> {
         Geometry::Sphere(Sphere::new(center, radius, material))
     }
 
-    pub fn moving_sphere(center0: Vector3<f32>, center1: Vector3<f32>, time0: f32, time1: f32, radius: f32, material: Material) -> Geometry<'material> {
+    pub fn moving_sphere(center0: Vector3<f32>, center1: Vector3<f32>, time0: f32, time1: f32, radius: f32, material: &'material Material) -> Geometry<'material> {
         Geometry::MovingSphere(MovingSphere::new(center0, center1, time0, time1, radius, material))
     }
 
