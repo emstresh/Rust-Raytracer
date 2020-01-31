@@ -81,21 +81,32 @@ fn main() {
     let aperture = 0.0;
     let camera = camera::Camera::new(look_from, look_at, Vector3::new(0.0, 1.0, 0.0), 40.0, aspect, aperture, dist_to_focus, 0.0, 1.0);
 
-    let green_material = &material::Material::lambertian(texture::Texture::constant(0.12, 0.45, 0.15));
-    let red_material = &material::Material::lambertian(texture::Texture::constant(0.65, 0.05, 0.05));
-    let white_material = &material::Material::lambertian(texture::Texture::constant(0.73, 0.73, 0.73));
-    let metal_material = &material::Material::metal(
-        texture::Texture::constant(
-            0.5 * (1.0 + random::<f32>()),
-            0.5 * (1.0 + random::<f32>()),
-            0.5 * (1.0 + random::<f32>())
-        ),
-        0.5 * random::<f32>()
+    let green_texture = &texture::Texture::constant(0.12, 0.45, 0.15);
+    let red_texture = &texture::Texture::constant(0.65, 0.05, 0.05);
+    let white_texture = &texture::Texture::constant(0.73, 0.73, 0.73);
+
+    let green_material = &material::Material::lambertian(green_texture);
+    let red_material = &material::Material::lambertian(red_texture);
+    let white_material = &material::Material::lambertian(white_texture);
+
+    let metal_texture = &texture::Texture::constant(
+        0.5 * (1.0 + random::<f32>()),
+        0.5 * (1.0 + random::<f32>()),
+        0.5 * (1.0 + random::<f32>())
     );
+
+    let metal_material = &material::Material::metal(metal_texture, 0.5 * random::<f32>());
+
+    let emissive_texture = &texture::Texture::constant(15.0, 15.0, 15.0);
+
     let dielectric_material = &material::Material::dielectric(1.5);
-    let emissive_material = &material::Material::diffuse_light(texture::Texture::constant(15.0, 15.0, 15.0));
-    let mars_material = &material::Material::lambertian(texture::Texture::image("./img/2k_mars.jpg"));
-    let noise_material = &material::Material::lambertian(texture::Texture::noise(4.0));
+    let emissive_material = &material::Material::diffuse_light(emissive_texture);
+
+    let img_texture = &texture::Texture::image("./img/2k_mars.jpg");
+    let mars_material = &material::Material::lambertian(img_texture);
+
+    let noise_texture = &texture::Texture::noise(4.0);
+    let noise_material = &material::Material::lambertian(noise_texture);
 
     let mut world = world::cornell_box(
         green_material,

@@ -15,7 +15,7 @@ const EPSILON: f32 = 0.0000001;
 pub struct Mesh<'material> {
     pub vertices: Vec<f32>,
     pub indices: Vec<usize>,
-    pub material: &'material Material
+    pub material: &'material Material<'material>
 }
 
 impl<'material> Mesh<'material> {

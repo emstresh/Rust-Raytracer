@@ -51,16 +51,16 @@ impl Hitable for Geometry<'_> {
     }
 }
 
-pub struct HitRecord<'a> {
+pub struct HitRecord<'material> {
     pub t: f32,
     pub p: Vector3<f32>,
     pub normal: Vector3<f32>,
-    pub material: &'a Material,
+    pub material: &'material Material<'material>,
     pub u: f32,
     pub v: f32
 }
 
-pub fn bounding_box_list<'a>(items: &'a [Geometry], t0: f32, t1: f32) -> BBox {
+pub fn bounding_box_list<'world>(items: &'world [Geometry], t0: f32, t1: f32) -> BBox {
     let min = items.iter().fold(
         Vector3::new(std::f32::MAX, std::f32::MAX, std::f32::MAX),
         |acc, item| {
@@ -91,7 +91,7 @@ pub fn bounding_box_list<'a>(items: &'a [Geometry], t0: f32, t1: f32) -> BBox {
     );
 }
 
-pub fn hit_list<'a>(items: &'a [Geometry], r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord<'a>> {
+pub fn hit_list<'world>(items: &'world [Geometry], r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord<'world>> {
     let mut hit_anything: Option<HitRecord> = None;
     let mut closest_so_far = t_max;
     items.iter().for_each(|item| {

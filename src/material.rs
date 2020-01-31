@@ -9,12 +9,12 @@ use cgmath::{
     InnerSpace
 };
 
-pub struct Lambertian {
-    pub albedo: Texture
+pub struct Lambertian<'texture> {
+    pub albedo: &'texture Texture<'texture>
 }
 
-pub struct Metal {
-    pub albedo: Texture,
+pub struct Metal<'texture> {
+    pub albedo: &'texture Texture<'texture>,
     pub fuzz: f32
 }
 
@@ -22,8 +22,8 @@ pub struct Dielectric {
     pub ref_idx: f32
 }
 
-pub struct DiffuseLight {
-    pub emit: Texture
+pub struct DiffuseLight<'texture> {
+    pub emit: &'texture Texture<'texture>
 }
 
 pub struct Scatter {
@@ -41,32 +41,32 @@ pub trait Emitter {
     }
 }
 
-pub enum Material {
-    Lambertian(Lambertian),
-    Metal(Metal),
+pub enum Material<'texture> {
+    Lambertian(Lambertian<'texture>),
+    Metal(Metal<'texture>),
     Dielectric(Dielectric),
-    DiffuseLight(DiffuseLight)
+    DiffuseLight(DiffuseLight<'texture>)
 }
 
-impl Material {
-    pub fn lambertian(albedo: Texture) -> Material {
+impl<'texture> Material<'texture> {
+    pub fn lambertian(albedo: &'texture Texture) -> Material<'texture> {
         Material::Lambertian(Lambertian { albedo })
     }
 
-    pub fn metal(albedo: Texture, f: f32) -> Material {
+    pub fn metal(albedo: &'texture Texture, f: f32) -> Material<'texture> {
         Material::Metal(Metal { albedo, fuzz: f.min(1.0) })
     }
 
-    pub fn dielectric(ref_idx: f32) -> Material {
+    pub fn dielectric(ref_idx: f32) -> Material<'texture> {
         Material::Dielectric(Dielectric { ref_idx })
     }
 
-    pub fn diffuse_light(emit: Texture) -> Material {
+    pub fn diffuse_light(emit: &'texture Texture) -> Material<'texture> {
         Material::DiffuseLight(DiffuseLight { emit })
     }
 }
 
-impl Scattered for Material {
+impl Scattered for Material<'_> {
     fn scatter(&self, r_in: Ray, hit: &HitRecord) -> Option<Scatter> {
         match &hit.material {
             Material::Lambertian(l) => l.scatter(r_in, &hit),
@@ -77,7 +77,7 @@ impl Scattered for Material {
     }
 }
 
-impl Emitter for Material {
+impl Emitter for Material<'_> {
     fn emitted(&self, u: f32, v: f32, p: &Vector3<f32>) -> Vector3<f32> {
         match &self {
             Material::Lambertian(l) => l.emitted(u, v, p),
@@ -88,7 +88,7 @@ impl Emitter for Material {
     }
 }
 
-impl Scattered for Lambertian {
+impl Scattered for Lambertian<'_> {
     fn scatter(&self, r_in: Ray, hit: &HitRecord) -> Option<Scatter> {
         let target = hit.p + hit.normal + util::random_in_unit_sphere();
         Some(Scatter {
@@ -98,9 +98,9 @@ impl Scattered for Lambertian {
     }
 }
 
-impl Emitter for Lambertian {}
+impl Emitter for Lambertian<'_> {}
 
-impl Scattered for Metal {
+impl Scattered for Metal<'_> {
     fn scatter(&self, r_in: Ray, hit: &HitRecord) -> Option<Scatter> {
         let reflected = reflect(r_in.direction.normalize(), hit.normal);
         if dot(reflected, hit.normal) > 0.0 {
@@ -118,7 +118,7 @@ impl Scattered for Metal {
     }
 }
 
-impl Emitter for Metal {}
+impl Emitter for Metal<'_> {}
 
 impl Scattered for Dielectric {
     fn scatter(&self, r_in: Ray, hit: &HitRecord) -> Option<Scatter> {
@@ -193,13 +193,13 @@ pub fn schlick(cosine: f32, ref_idx: f32) -> f32 {
     r0 + (1.0 - r0) * (1.0 - cosine).powf(5.0)
 }
 
-impl Scattered for DiffuseLight {
+impl Scattered for DiffuseLight<'_> {
     fn scatter(&self, r_in: Ray, hit: &HitRecord) -> Option<Scatter> {
         None
     }
 }
 
-impl Emitter for DiffuseLight {
+impl Emitter for DiffuseLight<'_> {
     fn emitted(&self, u: f32, v: f32, p: &Vector3<f32>) -> Vector3<f32> {
         self.emit.value(u, v, p)
     }

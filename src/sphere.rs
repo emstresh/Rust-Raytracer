@@ -12,7 +12,7 @@ use cgmath::{
 pub struct Sphere<'material> {
     pub center: Vector3<f32>,
     pub radius: f32,
-    pub material: &'material Material
+    pub material: &'material Material<'material>
 }
 
 impl<'material> Sphere<'material> {

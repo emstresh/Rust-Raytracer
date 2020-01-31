@@ -7,32 +7,32 @@ pub trait Textured {
     fn value(&self, u: f32, v: f32, p: &Vector3<f32>) -> Vector3<f32>;
 }
 
-pub enum Texture {
+pub enum Texture<'texture> {
     Constant(ConstantTexture),
-    Checker(CheckerTexture),
+    Checker(CheckerTexture<'texture>),
     Noise(NoiseTexture),
     Image(ImageTexture)
 }
 
-impl Texture {
-    pub fn constant(r: f32, g: f32, b: f32) -> Texture {
+impl<'texture> Texture<'texture> {
+    pub fn constant(r: f32, g: f32, b: f32) -> Texture<'texture> {
         Texture::Constant(ConstantTexture { color: Vector3::new(r, g, b) })
     }
 
-    pub fn checker(t0: Texture, t1: Texture) -> Texture {
+    pub fn checker(t0: &'texture Texture, t1: &'texture Texture) -> Texture<'texture> {
         Texture::Checker(CheckerTexture::new(t0, t1))
     }
 
-    pub fn noise(scale: f32) -> Texture {
+    pub fn noise(scale: f32) -> Texture<'texture> {
         Texture::Noise(NoiseTexture::new(scale))
     }
 
-    pub fn image(path_str: &str) -> Texture {
+    pub fn image(path_str: &str) -> Texture<'texture> {
         Texture::Image(ImageTexture::new(path_str))
     }
 }
 
-impl Textured for Texture {
+impl Textured for Texture<'_> {
     fn value(&self, u: f32, v: f32, p: &Vector3<f32>) -> Vector3<f32> {
         match &self {
             Texture::Constant(t) => t.value(u, v, p),
@@ -48,8 +48,8 @@ pub struct ConstantTexture {
 }
 
 impl ConstantTexture {
-    pub fn new(r:f32, g: f32, b: f32) -> ConstantTexture {
-        ConstantTexture {
+    pub fn new(r:f32, g: f32, b: f32) -> Self {
+        Self {
             color: Vector3::new(r, g, b)
         }
     }
@@ -61,21 +61,21 @@ impl Textured for ConstantTexture {
     }
 }
 
-pub struct CheckerTexture {
-    odd: Box<Texture>,
-    even: Box<Texture>
+pub struct CheckerTexture<'texture> {
+    odd: &'texture Texture<'texture>,
+    even: &'texture Texture<'texture>
 }
 
-impl CheckerTexture {
-    pub fn new(even: Texture, odd: Texture) -> CheckerTexture {
-        CheckerTexture {
-            even: Box::new(even),
-            odd: Box::new(odd)
+impl<'texture> CheckerTexture<'texture> {
+    pub fn new(even: &'texture Texture, odd: &'texture Texture) -> Self {
+        Self {
+            even: even,
+            odd: odd
         }
     }
 }
 
-impl Textured for CheckerTexture {
+impl Textured for CheckerTexture<'_> {
     fn value(&self, u: f32, v: f32, p: &Vector3<f32>) -> Vector3<f32> {
         let sines = (10.0 * p.x).sin() * (10.0 * p.y).sin() * (10.0 * p.z).sin();
         if sines < 0.0 {
@@ -92,8 +92,8 @@ pub struct NoiseTexture {
 }
 
 impl NoiseTexture {
-    pub fn new(scale: f32) -> NoiseTexture {
-        NoiseTexture {
+    pub fn new(scale: f32) -> Self {
+        Self {
             noise: Perlin::new(),
             scale
         }
@@ -113,24 +113,24 @@ pub struct ImageTexture {
 }
 
 impl ImageTexture {
-    pub fn new(path_str: &str) -> ImageTexture {
+    pub fn new(path_str: &str) -> Self {
         let path = std::path::Path::new(path_str);
         if let Ok((width, height)) = image::image_dimensions(path) {
             if let Ok(img) = image::open(path) {
-                ImageTexture {
+                Self {
                     data: img.raw_pixels(),
                     nx: width as i32,
                     ny: height as i32
                 }
             } else {
-                ImageTexture {
+                Self {
                     data: vec![255, 255, 0],
                     nx: 1,
                     ny: 1
                 }
             }
         } else {
-            ImageTexture {
+            Self {
                 data: vec![255, 255, 0],
                 nx: 1,
                 ny: 1
